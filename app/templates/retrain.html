@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clasificador de Fake News - Reentrenamiento</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 2rem;
+            background-color: #f8f9fa;
+        }
+        .card {
+            margin-bottom: 1.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .container {
+            max-width: 1200px;
+        }
+        .footer {
+            margin-top: 2rem;
+            padding: 1.5rem 0;
+            color: #6c757d;
+            border-top: 1px solid #dee2e6;
+        }
+        .btn-add {
+            margin-bottom: 15px;
+        }
+        .category-selector {
+            margin-bottom: 20px;
+        }
+        #results {
+            display: none;
+        }
+        .metrics-card {
+            margin-top: 20px;
+        }
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container d-flex justify-content-center">
+            <a class="navbar-brand" href="/" style="text-align: center;">Clasificador de fake news</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="card-title">Reentrenamiento del Modelo</h2>
+                        <p class="card-text">Agrega nuevos ejemplos etiquetados para mejorar el modelo de clasificación de fake news.</p>
+                        
+                        <div class="alert alert-info" role="alert">
+                            <h5>Categorías:</h5>
+                            <p><strong>0 - Noticia Real:</strong> Textos de noticias verificadas como verdaderas</p>
+                            <p><strong>1 - Fake News:</strong> Textos de noticias falsas o engañosas</p>
+                        </div>
+                        
+                        <form id="retrain-form">
+                            <div id="text-inputs">
+                                <div class="text-input">
+                                    <h5>Noticia 1</h5>
+                                    <div class="mb-3">
+                                        <label for="titulo-1" class="form-label">Título</label>
+                                        <input type="text" class="form-control" id="titulo-1" placeholder="Ingresa el título de la noticia" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="descripcion-1" class="form-label">Descripción</label>
+                                        <textarea class="form-control" id="descripcion-1" rows="3" placeholder="Ingresa el contenido de la noticia" required></textarea>
+                                    </div>
+                                    <div class="mb-3 category-selector">
+                                        <label class="form-label">Categoría</label>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="categoria-1" id="categoria-0-1" value="0" required>
+                                            <label class="form-check-label" for="categoria-0-1">
+                                                0 - Noticia Real
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="categoria-1" id="categoria-1-1" value="1">
+                                            <label class="form-check-label" for="categoria-1-1">
+                                                1 - Fake News
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                </div>
+                            </div>
+                            
+                            <button type="button" id="add-text" class="btn btn-secondary btn-add">+ Agregar otra noticia</button>
+                            <button type="submit" class="btn btn-success">Reentrenar modelo</button>
+                        </form>
+                        
+                        <div id="loading" class="text-center mt-4" style="display:none;">
+                            <div class="spinner-border text-success" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                            <p>Reentrenando el modelo. Esto puede tardar unos minutos...</p>
+                        </div>
+                        
+                        <div id="results" class="mt-4">
+                            <h3>Resultados del Reentrenamiento</h3>
+                            
+                            <div class="alert alert-success" role="alert">
+                                <p><strong>¡Modelo reentrenado con éxito!</strong></p>
+                                <p>El modelo ha sido actualizado con los nuevos datos proporcionados.</p>
+                            </div>
+                            
+                            <div class="row metrics-card">
+                                <div class="col-md-4">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Exactitud (Accuracy)</h5>
+                                            <p class="card-text metric-value" id="accuracy-value">-</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Puntuación F1</h5>
+                                            <p class="card-text metric-value" id="f1-value">-</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card text-center">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Total de Ejemplos</h5>
+                                            <p class="card-text metric-value" id="examples-count">-</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card mt-4">
+                                <div class="card-body">
+                                    <h5 class="card-title">Informe Detallado</h5>
+                                    <pre id="classification-report" class="bg-light p-3"></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <p>&copy; 2025 Clasificador de fake news</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Variables para llevar el conteo de textos
+        let textCount = 1;
+
+        // Función para agregar un nuevo campo de texto
+        document.getElementById('add-text').addEventListener('click', function() {
+            textCount++;
+            
+            const newTextInput = document.createElement('div');
+            newTextInput.className = 'text-input';
+            newTextInput.innerHTML = `
+                <h5>Noticia ${textCount}</h5>
+                <div class="mb-3">
+                    <label for="titulo-${textCount}" class="form-label">Título</label>
+                    <input type="text" class="form-control" id="titulo-${textCount}" placeholder="Ingresa el título de la noticia" required>
+                </div>
+                <div class="mb-3">
+                    <label for="descripcion-${textCount}" class="form-label">Descripción</label>
+                    <textarea class="form-control" id="descripcion-${textCount}" rows="3" placeholder="Ingresa el contenido de la noticia" required></textarea>
+                </div>
+                <div class="mb-3 category-selector">
+                    <label class="form-label">Categoría</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="categoria-${textCount}" id="categoria-0-${textCount}" value="0" required>
+                        <label class="form-check-label" for="categoria-0-${textCount}">
+                            0 - Noticia Real
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="categoria-${textCount}" id="categoria-1-${textCount}" value="1">
+                        <label class="form-check-label" for="categoria-1-${textCount}">
+                            1 - Fake News
+                        </label>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-danger btn-remove mb-3">Eliminar</button>
+                <hr>
+            `;
+            
+            document.getElementById('text-inputs').appendChild(newTextInput);
+            
+            // Agregar evento para eliminar
+            newTextInput.querySelector('.btn-remove').addEventListener('click', function() {
+                newTextInput.remove();
+            });
+        });
+
+        // Manejar el envío del formulario
+        document.getElementById('retrain-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Mostrar indicador de carga
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            
+            // Recopilar todos los textos con sus etiquetas
+            const datos = [];
+            const textInputs = document.querySelectorAll('.text-input');
+            
+            textInputs.forEach((input, index) => {
+                const numero = index + 1;
+                const titulo = document.getElementById(`titulo-${numero}`).value;
+                const descripcion = document.getElementById(`descripcion-${numero}`).value;
+                
+                // Obtener categoría seleccionada
+                const categoria = document.querySelector(`input[name="categoria-${numero}"]:checked`);
+                
+                if (categoria && (titulo.trim() !== '' || descripcion.trim() !== '')) {
+                    datos.push({
+                        Titulo: titulo,
+                        Descripcion: descripcion,
+                        Label: parseInt(categoria.value)
+                    });
+                }
+            });
+            
+            // Preparar datos para la API
+            const data = {
+                datos: datos
+            };
+            
+            // Enviar solicitud al endpoint de reentrenamiento
+            fetch('/retrain', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Ocultar indicador de carga
+                document.getElementById('loading').style.display = 'none';
+                
+                // Mostrar resultados del reentrenamiento
+                displayResults(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('loading').style.display = 'none';
+                alert('Ocurrió un error durante el reentrenamiento. Por favor, intenta de nuevo.');
+            });
+        });
+
+        // Función para mostrar los resultados del reentrenamiento
+        function displayResults(data) {
+            // Actualizar valores de métricas
+            document.getElementById('accuracy-value').textContent = (data.accuracy * 100).toFixed(2) + '%';
+            document.getElementById('f1-value').textContent = (data.f1_score * 100).toFixed(2) + '%';
+            document.getElementById('examples-count').textContent = document.querySelectorAll('.text-input').length;
+            
+            // Formatear el informe de clasificación para mostrarlo
+            let reportText = '';
+            
+            if (data.classification_report) {
+                const report = data.classification_report;
+                
+                reportText += '               precision    recall  f1-score   support\n\n';
+                
+                for (const label in report) {
+                    if (label !== 'accuracy' && label !== 'macro avg' && label !== 'weighted avg') {
+                        const metrics = report[label];
+                        reportText += `         ${label}       ${metrics.precision.toFixed(2)}      ${metrics.recall.toFixed(2)}      ${metrics['f1-score'].toFixed(2)}      ${metrics.support}\n`;
+                    }
+                }
+                
+                reportText += '\n';
+                reportText += `   accuracy                           ${report.accuracy.toFixed(2)}      ${report.macro_avg?.support || ''}\n`;
+                reportText += `  macro avg       ${report.macro_avg?.precision.toFixed(2)}      ${report.macro_avg?.recall.toFixed(2)}      ${report.macro_avg?.['f1-score'].toFixed(2)}      ${report.macro_avg?.support || ''}\n`;
+                reportText += `weighted avg       ${report.weighted_avg?.precision.toFixed(2)}      ${report.weighted_avg?.recall.toFixed(2)}      ${report.weighted_avg?.['f1-score'].toFixed(2)}      ${report.weighted_avg?.support || ''}\n`;
+            }
+            
+            document.getElementById('classification-report').textContent = reportText;
+            
+            // Mostrar sección de resultados
+            document.getElementById('results').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

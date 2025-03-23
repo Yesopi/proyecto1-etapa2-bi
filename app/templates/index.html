@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clasificador de Fake News</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 2rem;
+            background-color: #f8f9fa;
+        }
+        .card {
+            margin-bottom: 1.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .text-primary {
+            color: #0d6efd !important;
+        }
+        .container {
+            max-width: 1200px;
+        }
+        .footer {
+            margin-top: 2rem;
+            padding: 1.5rem 0;
+            color: #6c757d;
+            border-top: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container d-flex justify-content-center">
+            <a class="navbar-brand" href="/" style="text-align: center;">Clasificador de fake news</a>
+        </div>
+    </nav>
+        
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h1 class="card-title">Bienvenido al Clasificador de fake news </h1>
+                        <p class="card-text">Esta aplicación te permite clasificar fake news y reentrenar el modelo con nuevos datos.</p>
+                        <p class="card-text"></p> Selecciona una opción:</p>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">Realizar predicciones</h5>
+                                        <p class="card-text">Clasifica nuevas fake news usando el modelo entrenado.</p>
+                                        <a href="/predict" class="btn btn-primary">Ir a Predicción</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">Reentrenar modelo</h5>
+                                        <p class="card-text">Envía nuevos datos etiquetados para mejorar el modelo.</p>
+                                        <a href="/retrain" class="btn btn-success">Ir a Reentrenamiento</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h3 class="card-title">Información del Modelo</h3>
+                        <p class="card-text">El modelo actual está entrenado para clasificar textos en dos categorías:</p>
+                        <ul>
+                            <li><strong>Clase 0:</strong> Textos clasificados como noticia real</li>
+                            <li><strong>Clase 1:</strong> Textos clasificados como fake new </li>
+                        </ul>
+                        <p>El modelo utiliza técnicas de procesamiento de lenguaje natural y aprendizaje automático para hacer sus predicciones.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <p>&copy; 2025 Clasificador de fake news</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
