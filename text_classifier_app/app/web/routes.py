@@ -5,7 +5,7 @@ import requests
 import json
 import os
 
-from app.models.model_utils import retrain_model_full
+from app.models.model_utils import retrain_model_full, retrain_model_incremental
 
 # Crear el blueprint para la interfaz web
 web_bp = Blueprint('web', __name__, template_folder='templates')
@@ -144,9 +144,19 @@ def retrain():
                                         message="Modelo reentrenado exitosamente con el método completo",
                                         metrics=result)
             elif retrain_type == 'incremental':
-                # Reentrenamiento incremental (implementaremos más tarde)
-                return render_template('retrain.html', 
-                                    error="El reentrenamiento incremental aún no está implementado")
+                # Reentrenamiento incremental
+                result = retrain_model_incremental(df_new)
+                
+                if 'error' in result:
+                    # Si hubo un error al cargar/entrenar el modelo
+                    return render_template('retrain.html', 
+                                        error=result['message'])
+                else:
+                    # Si todo salió bien
+                    return render_template('retrain.html', 
+                                        success=True, 
+                                        message="Modelo reentrenado exitosamente con el método incremental",
+                                        metrics=result)
             elif retrain_type == 'fine_tuning':
                 # Ajuste fino (implementaremos más tarde)
                 return render_template('retrain.html', 
