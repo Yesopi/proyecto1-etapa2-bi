@@ -16,7 +16,7 @@
         <div class="header">
             <div class="row align-items-center">
                 <div class="col-md-2 text-center">
-                    <img src="{{ url_for('static', filename='images/University_of_Los_Andes_logo.svg.png') }}" alt="Logo" class="logo-image">
+                    <img src="{{ url_for('static', filename='images/Universidad_de_los_Andes_(logo).png') }}" alt="Logo" class="logo-image">
                 </div>
                 <div class="col-md-4 text-center">
                     <h3>Detector de Noticias Falsas</h3>
@@ -24,8 +24,9 @@
                 <div class="col-md-6 text-end">
                     <nav class="nav justify-content-end">
                         <a class="nav-link" href="{{ url_for('web.index') }}">Inicio</a>
-                        <a class="nav-link" href="{{ url_for('web.analyze') }}">Analizar</a>
-                        <a class="nav-link" href="{{ url_for('web.upload') }}">Cargar CSV</a>
+                        <a class="nav-link" href="{{ url_for('web.clasificate') }}">Clasificar noticia</a>
+                        <a class="nav-link" href="{{ url_for('web.upload') }}">Clasificar en lote</a>
+                        <a class="nav-link" href="{{ url_for('web.retrain') }}">Reentrenar</a>
                     </nav>
                 </div>
             </div>

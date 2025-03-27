@@ -4,46 +4,43 @@
 <div class="row">
     <div class="col-md-12 text-center mb-4">
         <h1>Bienvenido al Detector de Noticias Falsas</h1>
-        <p class="lead">Utiliza la inteligencia artificial para detectar posibles noticias falsas</p>
     </div>
 </div>
 
 <div class="row mb-4">
-    <div class="col-md-6">
+    <div class="col-md-4">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title text-center">Analizar una noticia</h5>
+                <h5 class="card-title text-center">Clasificar una noticia</h5>
                 <p class="card-text">Introduce el texto de una noticia para determinar si podría ser falsa o verdadera.</p>
                 <div class="text-center">
-                    <a href="{{ url_for('web.analyze') }}" class="btn btn-primary">Analizar noticia</a>
+                    <a href="{{ url_for('web.clasificate') }}" class="btn btn-primary">Clasificar noticia</a>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-4">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title text-center">Cargar un archivo CSV</h5>
-                <p class="card-text">Analiza múltiples noticias a la vez cargando un archivo CSV.</p>
+                <h5 class="card-title text-center">Clasificar en lote</h5>
+                <p class="card-text">Clasifica múltiples noticias a la vez cargando un archivo CSV.</p>
                 <div class="text-center">
                     <a href="{{ url_for('web.upload') }}" class="btn btn-primary">Cargar CSV</a>
                 </div>
             </div>
         </div>
     </div>
-</div>
-
-<div class="row">
-    <div class="col-md-12">
+    <div class="col-md-4">
         <div class="card">
-            <div class="card-header text-center">
-                <h5>¿Cómo funciona?</h5>
-            </div>
             <div class="card-body">
-                <p>Este sistema utiliza un modelo de aprendizaje automático entrenado con miles de noticias para identificar patrones lingüísticos que pueden indicar si una noticia es potencialmente falsa.</p>
-                <p>El detector analiza el texto y proporciona una clasificación junto con la probabilidad de que la noticia sea verdadera o falsa.</p>
+                <h5 class="card-title text-center">Reentrenar modelo</h5>
+                <p class="card-text">Mejora el modelo utilizando nuevos datos de entrenamiento etiquetados.</p>
+                <div class="text-center">
+                    <a href="{{ url_for('web.retrain') }}" class="btn btn-primary">Reentrenar</a>
+                </div>
             </div>
         </div>
     </div>
+</div>
 </div>
 {% endblock %}
