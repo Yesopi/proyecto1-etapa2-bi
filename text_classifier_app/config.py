@@ -1,3 +1,4 @@
+# config.py
 import os
 
 # Rutas de directorios
@@ -8,6 +9,9 @@ MODEL_DIR = os.path.join(DATA_DIR, 'model')
 
 # Ruta del modelo
 MODEL_PATH = os.path.join(MODEL_DIR, 'modelo_clasificacion_texto.joblib')
+
+# Ruta de los datos originales
+ORIGINAL_DATA_PATH = os.path.join(DATA_DIR, 'notebooks', 'datosOriginales.csv')
 
 # Configuración de la aplicación Flask
 DEBUG = True
