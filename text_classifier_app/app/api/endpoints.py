@@ -177,16 +177,8 @@ def api_retrain():
             return jsonify({"error": "Tipo de reentrenamiento no válido"}), 400
         
         # Leer el CSV
-        try:
-            # Intentar diferentes codificaciones y delimitadores
-            df_new = pd.read_csv(io.StringIO(csv_file.read().decode('utf-8')), sep=";")
-        except:
-            csv_file.seek(0)
-            try:
-                df_new = pd.read_csv(io.StringIO(csv_file.read().decode('utf-8')), sep=",")
-            except:
-                csv_file.seek(0)
-                df_new = pd.read_csv(io.StringIO(csv_file.read().decode('latin-1')), sep=";")
+        # Intentar diferentes codificaciones y delimitadores
+        df_new = pd.read_csv(io.StringIO(csv_file.read().decode('utf-8')), sep=";")
         
         # Verificar que contiene las columnas necesarias
         if 'Descripcion' not in df_new.columns or 'Label' not in df_new.columns:
