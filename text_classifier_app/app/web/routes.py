@@ -5,7 +5,7 @@ import requests
 import json
 import os
 
-from app.models.model_utils import retrain_model_full
+from app.models.model_utils import retrain_model_fine_tuning, retrain_model_full, retrain_model_incremental
 
 # Crear el blueprint para la interfaz web
 web_bp = Blueprint('web', __name__, template_folder='templates')
@@ -112,49 +112,30 @@ def retrain():
             return render_template('retrain.html', error="El archivo debe ser un CSV")
         
         try:
-            # Leer el CSV
-            try:
-                df_new = pd.read_csv(io.StringIO(csv_file.read().decode('utf-8')), sep=";")
-            except:
-                csv_file.seek(0)
-                try:
-                    df_new = pd.read_csv(io.StringIO(csv_file.read().decode('utf-8')), sep=",")
-                except:
-                    csv_file.seek(0)
-                    df_new = pd.read_csv(io.StringIO(csv_file.read().decode('latin-1')), sep=";")
+            # Hacer petición a nuestra propia API
+            api_url = request.host_url.rstrip('/') + url_for('api.api_retrain')
+            files = {'file': (csv_file.filename, csv_file, 'text/csv')}
+            data = {'retrain_type': retrain_type}
             
-            # Verificar que contiene las columnas necesarias
-            if 'Descripcion' not in df_new.columns or 'Label' not in df_new.columns:
-                return render_template('retrain.html', 
-                        error="El CSV debe contener las columnas 'Descripcion' y 'Label'")
+            response = requests.post(api_url, files=files, data=data)
             
-            # Implementar la lógica de reentrenamiento según el tipo seleccionado
-            if retrain_type == 'full':
-                # Reentrenamiento completo
-                result = retrain_model_full(df_new)
-                
-                if 'error' in result:
-                    # Si hubo un error al cargar/entrenar el modelo
-                    return render_template('retrain.html', 
-                                        error=result['message'])
-                else:
-                    # Si todo salió bien
-                    return render_template('retrain.html', 
-                                        success=True, 
-                                        message="Modelo reentrenado exitosamente con el método completo",
-                                        metrics=result)
-            elif retrain_type == 'incremental':
-                # Reentrenamiento incremental (implementaremos más tarde)
+            if response.ok:
+                result = response.json()
                 return render_template('retrain.html', 
-                                    error="El reentrenamiento incremental aún no está implementado")
-            elif retrain_type == 'fine_tuning':
-                # Ajuste fino (implementaremos más tarde)
-                return render_template('retrain.html', 
-                                    error="El ajuste fino aún no está implementado")
+                                    success=True, 
+                                    message=result['message'],
+                                    metrics=result['metrics'])
             else:
-                return render_template('retrain.html', 
-                                    error="Tipo de reentrenamiento no válido")
-        
+                error_msg = "Error al reentrenar el modelo"
+                if response.text:
+                    try:
+                        error_data = response.json()
+                        if 'error' in error_data:
+                            error_msg = error_data['error']
+                    except:
+                        pass
+                return render_template('retrain.html', error=error_msg)
+            
         except Exception as e:
             return render_template('retrain.html', 
                                 error=f"Error en el procesamiento: {str(e)}")
