@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 import pandas as pd
-from app.models.model_utils import load_model
+from app.models.model_utils import load_model, retrain_model_fine_tuning, retrain_model_full, retrain_model_incremental
 import io
 
 # Crear un Blueprint para los endpoints de la API
@@ -148,7 +148,71 @@ def predict_json():
     except Exception as e:
         return jsonify({"error": f"Error en el procesamiento: {str(e)}"}), 500
 
-
+@api_bp.route('/retrain', methods=['POST'])
+def api_retrain():
+    """
+    Endpoint para reentrenar el modelo con nuevos datos.
+    
+    Recibe: Archivo CSV con datos de entrenamiento y el tipo de reentrenamiento
+    Devuelve: JSON con métricas del modelo reentrenado
+    """
+    try:
+        # Verificar si se ha subido un archivo
+        if 'file' not in request.files:
+            return jsonify({"error": "No se ha subido ningún archivo"}), 400
+        
+        csv_file = request.files['file']
+        retrain_type = request.form.get('retrain_type')
+        
+        # Verificar que el archivo tiene un nombre
+        if csv_file.filename == '':
+            return jsonify({"error": "No se ha seleccionado ningún archivo"}), 400
+        
+        # Verificar que es un CSV
+        if not csv_file.filename.endswith('.csv'):
+            return jsonify({"error": "El archivo debe ser un CSV"}), 400
+        
+        # Verificar que se especificó un tipo de reentrenamiento válido
+        if retrain_type not in ['full', 'incremental', 'fine_tuning']:
+            return jsonify({"error": "Tipo de reentrenamiento no válido"}), 400
+        
+        # Leer el CSV
+        try:
+            # Intentar diferentes codificaciones y delimitadores
+            df_new = pd.read_csv(io.StringIO(csv_file.read().decode('utf-8')), sep=";")
+        except:
+            csv_file.seek(0)
+            try:
+                df_new = pd.read_csv(io.StringIO(csv_file.read().decode('utf-8')), sep=",")
+            except:
+                csv_file.seek(0)
+                df_new = pd.read_csv(io.StringIO(csv_file.read().decode('latin-1')), sep=";")
+        
+        # Verificar que contiene las columnas necesarias
+        if 'Descripcion' not in df_new.columns or 'Label' not in df_new.columns:
+            return jsonify({"error": "El CSV debe contener las columnas 'Descripcion' y 'Label'"}), 400
+        
+        # Realizar el reentrenamiento según el tipo seleccionado
+        if retrain_type == 'full':
+            result = retrain_model_full(df_new)
+        elif retrain_type == 'incremental':
+            result = retrain_model_incremental(df_new)
+        elif retrain_type == 'fine_tuning':
+            result = retrain_model_fine_tuning(df_new)
+        
+        # Verificar si hubo un error
+        if 'error' in result:
+            return jsonify({"error": result['message']}), 500
+        
+        # Devolver las métricas
+        return jsonify({
+            "success": True,
+            "message": f"Modelo reentrenado exitosamente con el método {retrain_type}",
+            "metrics": result
+        })
+        
+    except Exception as e:
+        return jsonify({"error": f"Error en el procesamiento: {str(e)}"}), 500
 
 
 
