@@ -11,15 +11,6 @@ def load_model():
     return load_model_with_classes(MODEL_PATH)
 
 def retrain_model_full(df_new):
-    """
-    Realiza un reentrenamiento completo, combinando datos originales y nuevos
-    
-    Args:
-        df_new: DataFrame con nuevos datos de entrenamiento
-        
-    Returns:
-        dict: Métricas de evaluación o dict con error
-    """
     
     try:
         # Cargar los datos originales si existen

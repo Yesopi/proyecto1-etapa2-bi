@@ -6,7 +6,7 @@ def create_app():
     # Necesario para requests y sessions
     app.config['SECRET_KEY'] = 'tu_clave_secreta'
     
-    # Registrar blueprints
+    # Registrar blueprints de la api
     from app.api.endpoints import api_bp
     app.register_blueprint(api_bp, url_prefix='/api')
     
