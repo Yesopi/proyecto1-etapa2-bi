@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Resultado - Detector de Noticias Falsas{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2>Resultado del Análisis</h2>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="news-container {% if result.Label == 1 %}fake-news{% else %}true-news{% endif %}">
+            <h4>
+                {% if result.Label == 1 %}
+                <span class="fake-label">POSIBLE NOTICIA FALSA</span>
+                {% else %}
+                <span class="true-label">POSIBLE NOTICIA VERDADERA</span>
+                {% endif %}
+            </h4>
+            
+            {% if result.Titulo %}
+            <h3>{{ result.Titulo }}</h3>
+            {% endif %}
+            
+            <p class="mt-3">{{ result.Descripcion }}</p>
+            
+            {% if result.Fecha %}
+            <p class="text-muted"><small>Fecha: {{ result.Fecha }}</small></p>
+            {% endif %}
+            
+            <div class="mt-4">
+                <h5>Confianza del modelo:</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="progress mb-3">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: {{ result.Probabilidad_Clase_0 * 100 }}%">
+                                {{ "%.2f"|format(result.Probabilidad_Clase_0 * 100) }}% Verdadera
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="progress mb-3">
+                            <div class="progress-bar bg-danger" role="progressbar" 
+                                 style="width: {{ result.Probabilidad_Clase_1 * 100 }}%">
+                                {{ "%.2f"|format(result.Probabilidad_Clase_1 * 100) }}% Falsa
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-3">
+            <a href="{{ url_for('web.clasificar') }}" class="btn btn-primary">Clasificar otra noticia</a>
+            <a href="{{ url_for('web.index') }}" class="btn btn-secondary">Volver al inicio</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

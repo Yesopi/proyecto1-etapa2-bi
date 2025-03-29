@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Reentrenar Modelo - Detector de Noticias Falsas{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2 class="text-center mb-4">Reentrenamiento del Modelo</h2>
+        
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+        
+        {% if success %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header text-center">
+                <h5>Métricas del Modelo Reentrenado</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="card-title">Precisión</h5>
+                                <p class="card-text display-6">{{ (metrics.precision * 100)|round(2) }}%</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="card-title">Recall</h5>
+                                <p class="card-text display-6">{{ (metrics.recall * 100)|round(2) }}%</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="card-title">F1-Score</h5>
+                                <p class="card-text display-6">{{ (metrics.f1 * 100)|round(2) }}%</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="card-title">Exactitud</h5>
+                                <p class="card-text display-6">{{ (metrics.accuracy * 100)|round(2) }}%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3 text-center">
+                    <p>Total de muestras utilizadas: <strong>{{ metrics.samples }}</strong></p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title text-center">Seleccione archivo para reentrenamiento</h5>
+                <p class="card-text">El archivo CSV debe contener tanto las características como la etiqueta objetivo (Label).</p>
+                
+                <form method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="csv_file" class="form-label">Archivo CSV con datos de entrenamiento</label>
+                        <input type="file" class="form-control" id="csv_file" name="csv_file" accept=".csv" required>
+                        <div class="form-text">El archivo debe contener las columnas: Descripcion, Label</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="retrain_type" class="form-label">Tipo de Reentrenamiento</label>
+                        <select class="form-select" id="retrain_type" name="retrain_type" required>
+                            <option value="" selected disabled>Seleccione un método</option>
+                            <option value="full">Reentrenamiento Completo (Full Retraining)</option>
+                            <option value="incremental">Reentrenamiento Incremental (Incremental Learning)</option>
+                            <option value="fine_tuning">Ajuste Fino (Fine-tuning)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="retrain_info">
+                        <!-- Aquí mostraremos información sobre el método seleccionado mediante JavaScript -->
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">Reentrenar Modelo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header text-center">
+                <h5>Métodos de Reentrenamiento</h5>
+            </div>
+            <div class="card-body">
+                <h6>Reentrenamiento Completo (Full Retraining)</h6>
+                <p>Entrena el modelo desde cero usando tanto los datos originales como los nuevos datos en conjunto.</p>
+                <p><strong>Ventaja:</strong> Asegura que el modelo aprenda de forma equilibrada de todos los datos disponibles.</p>
+                <p><strong>Desventaja:</strong> Computacionalmente costoso, especialmente con grandes volúmenes de datos.</p>
+                
+                <hr>
+                
+                <h6>Reentrenamiento Incremental (Incremental Learning)</h6>
+                <p>Actualiza el modelo existente usando solo los nuevos datos, sin utilizar los datos originales.</p>
+                <p><strong>Ventaja:</strong> Mucho más eficiente computacionalmente, ideal para actualizaciones frecuentes.</p>
+                <p><strong>Desventaja:</strong> Puede sufrir de "olvido catastrófico" donde el modelo pierde rendimiento en los datos antiguos.</p>
+                
+                <hr>
+                
+                <h6>Ajuste Fino (Fine-tuning)</h6>
+                <p>Comienza con el modelo existente y ajusta sus parámetros utilizando los nuevos datos, a menudo con una tasa de aprendizaje más baja.</p>
+                <p><strong>Ventaja:</strong> Es más rápido que el reentrenamiento completo y preserva gran parte del conocimiento previo del modelo, adaptándolo eficientemente a los nuevos datos.</p>
+                <p><strong>Desventaja:</strong> Puede no ser suficiente si los nuevos datos requieren cambios sustanciales en los parámetros del modelo.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Script para mostrar información del método seleccionado
+    document.getElementById('retrain_type').addEventListener('change', function() {
+        const infoDiv = document.getElementById('retrain_info');
+        const selectedOption = this.value;
+        
+        let infoText = '';
+        
+        if (selectedOption === 'full') {
+            infoText = '<div class="alert alert-info">El reentrenamiento completo usará todos los datos disponibles. Este proceso puede tomar más tiempo pero ofrece resultados óptimos.</div>';
+        } else if (selectedOption === 'incremental') {
+            infoText = '<div class="alert alert-info">El reentrenamiento incremental solo usará los nuevos datos. Es rápido pero puede perder precisión en datos antiguos.</div>';
+        } else if (selectedOption === 'fine_tuning') {
+            infoText = '<div class="alert alert-info">El ajuste fino comienza con el modelo existente y lo actualiza con los nuevos datos utilizando una tasa de aprendizaje menor. Ofrece un buen equilibrio entre velocidad y retención de conocimiento.</div>';
+        }
+        
+        infoDiv.innerHTML = infoText;
+    });
+</script>
+{% endblock %}

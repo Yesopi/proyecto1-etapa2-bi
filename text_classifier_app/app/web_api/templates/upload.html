@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Cargar CSV - Detector de Noticias Falsas{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Cargar archivo CSV</h2>
+        <p>Sube un archivo CSV con noticias para clasificar en lote.</p>
+        
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+        
+        <form method="post" action="{{ url_for('web.clasificar') }}" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="csv_file" class="form-label">Archivo CSV</label>
+                <input type="file" class="form-control" id="csv_file" name="csv_file" accept=".csv" required>
+                <div class="form-text">El archivo debe tener al menos una columna llamada "Descripcion"</div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Procesar archivo</button>
+        </form>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Formato del archivo CSV</h5>
+            </div>
+            <div class="card-body">
+                <p>El archivo CSV debe contener al menos la siguiente columna:</p>
+                <ul>
+                    <li><strong>Descripcion</strong> - Texto de la noticia a clasificar (obligatorio)</li>
+                </ul>
+                
+                <p>Columnas opcionales:</p>
+                <ul>
+                    <li><strong>ID</strong> - Identificador de la noticia</li>
+                    <li><strong>Titulo</strong> - Título de la noticia</li>
+                    <li><strong>Fecha</strong> - Fecha de la noticia</li>
+                </ul>
+                
+                <p>Ejemplo:</p>
+                <pre>ID;Titulo;Descripcion;Fecha
+1;Título de la noticia 1;Texto de la noticia 1...;01/01/2023
+2;Título de la noticia 2;Texto de la noticia 2...;02/01/2023</pre>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
