@@ -8,7 +8,6 @@ import spacy
 from sklearn.base import BaseEstimator, TransformerMixin
 import nltk
 
-# Asegurarse de que los recursos de NLTK estén disponibles
 nltk.download('punkt', quiet=True)
 nltk.download('stopwords', quiet=True)
 

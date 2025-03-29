@@ -11,15 +11,6 @@ def load_model():
     return load_model_with_classes(MODEL_PATH)
 
 def retrain_model_full(df_new):
-    """
-    Realiza un reentrenamiento completo, combinando datos originales y nuevos
-    
-    Args:
-        df_new: DataFrame con nuevos datos de entrenamiento
-        
-    Returns:
-        dict: Métricas de evaluación o dict con error
-    """
     
     try:
         # Cargar los datos originales si existen
@@ -170,12 +161,10 @@ def retrain_model_incremental(df_new):
         }
 
 def retrain_model_fine_tuning(df_new):
-    
+    print(f"Datos de df new: {len(df_new)} filas")
     # Eliminar duplicados en los nuevos datos
     df_new = df_new.drop_duplicates(subset=['Descripcion'], keep='first')
-    
-    # Asegurar que Label sea de tipo entero
-    df_new['Label'] = df_new['Label'].astype(int)
+    print(f"Datos de df new: {len(df_new)} filas")
     
     # Cargar los datos originales y combinarlos con los nuevos
     total_samples = len(df_new)
@@ -194,12 +183,12 @@ def retrain_model_fine_tuning(df_new):
         # Si no existen datos originales, guardar los nuevos
         os.makedirs(os.path.dirname(ORIGINAL_DATA_PATH), exist_ok=True)
         df_new.to_csv(ORIGINAL_DATA_PATH, sep=';', index=False)
-    
+    print(f"Total de muestras: {total_samples}")
     # Dividir en entrenamiento y prueba
     df_train, df_test = train_test_split(
-        df_new, test_size=0.2, random_state=42, stratify=df_new['Label']
+        df_combined, test_size=0.2, random_state=42, stratify=df_combined['Label']
     )
-    
+    print(f"Datos de df new: {len(df_new)} filas")
     # Preparar X e y para entrenamiento
     X_train = df_train[['Descripcion']].copy()
     y_train = df_train['Label']
@@ -214,20 +203,17 @@ def retrain_model_fine_tuning(df_new):
         
         # Reducir la tasa de aprendizaje para el ajuste fino
         if hasattr(pipeline.named_steps['classifier'], 'learning_rate'):
+            print("El clasificador tiene tasa de aprendizaje configurable")
             # Guardar la tasa de aprendizaje original
             original_lr = pipeline.named_steps['classifier'].learning_rate
             # Reducir la tasa de aprendizaje a un 10% de la original para ajuste fino
             pipeline.named_steps['classifier'].learning_rate = original_lr * 0.1
-            
+            print(X_train.shape)
             # Entrenar con la tasa de aprendizaje reducida
             pipeline.fit(X_train, y_train)
             
             # Restaurar la tasa de aprendizaje original después del entrenamiento
             pipeline.named_steps['classifier'].learning_rate = original_lr
-        else:
-            # Si el clasificador no tiene tasa de aprendizaje configurable,
-            # realizamos un entrenamiento normal con los nuevos datos
-            pipeline.fit(X_train, y_train)
         
         # Evaluar el modelo
         y_pred = pipeline.predict(X_test)
